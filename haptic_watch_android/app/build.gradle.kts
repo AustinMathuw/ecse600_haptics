@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "edu.cwru.watch_bridge"
-        minSdk = 30
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

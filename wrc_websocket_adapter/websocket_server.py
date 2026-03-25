@@ -106,8 +106,8 @@ class HapticWebSocketServer:
         await self.broadcast(message)
     
     async def _broadcast_loop(self) -> None:
-        """Periodically broadcast state to all clients at 10Hz."""
-        interval = 0.1  # 10Hz = 100ms
+        """Periodically broadcast state to all clients at 20Hz."""
+        interval = 0.05  # 20Hz = 50ms
         
         while self._running:
             try:

@@ -67,7 +67,7 @@ class StateManager:
         self._min_gap = 50        # Gap at redline (ms) - fastest pulses
         self._max_gap = 1000       # Gap at idle (ms) - slowest pulses
         self._vibration_duration = 100  # Fixed vibration duration (ms)
-        self._base_intensity = 0.7      # Base intensity (0.0-1.0)
+        self._base_intensity = 0.5      # Base intensity (0.0-1.0)
     
     def update_from_session_start(self, packet_data: Dict[str, Any]) -> None:
         """Update state from session_start packet.
@@ -232,7 +232,7 @@ class StateManager:
         gap = int(self._max_gap - (self._max_gap - self._min_gap) * position)
         
         # Optional: Increase intensity as RPM increases
-        intensity = 1.0
+        intensity = 0.5
         
         return {
             'intensity': intensity,
