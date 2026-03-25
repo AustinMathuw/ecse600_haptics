@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "watch_bridge"
+		},
+		{
+			"path": "haptic_watch_android"
+		},
+		{
+			"path": "websocket_server"
+		}
+	],
+	"settings": {}
+}
