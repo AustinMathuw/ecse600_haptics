@@ -50,7 +50,8 @@ class HapticService : Service() {
             ACTION_HAPTIC_EVENT -> {
                 val intensity = intent.getIntExtra("intensity", 128)
                 val duration = intent.getIntExtra("duration", 100)
-                val timeBetween = intent.getIntExtra("timeBetween", 0)
+                val gap = intent.getIntExtra("timeBetween", 0)
+                val mode = intent.getStringExtra("mode") ?: "oneshot"
                 
                 // Auto-start session if not active for standalone haptic events
                 if (!isSessionActive) {
@@ -62,8 +63,8 @@ class HapticService : Service() {
                     })
                 }
                 
-                Log.d(TAG, "Executing haptic event: intensity=$intensity, duration=$duration, timeBetween=$timeBetween")
-                hapticManager.executeHapticPattern(intensity, duration, timeBetween)
+                Log.d(TAG, "Executing haptic event: mode=$mode, intensity=$intensity, duration=$duration, gap=$gap")
+                hapticManager.executeHapticPattern(intensity, duration, gap, mode)
             }
         }
         

@@ -7,7 +7,10 @@
 			"path": "haptic_watch_android"
 		},
 		{
-			"path": "websocket_server"
+			"path": "template_websocket_server"
+		},
+		{
+			"path": "wrc_websocket_adapter"
 		}
 	],
 	"settings": {}

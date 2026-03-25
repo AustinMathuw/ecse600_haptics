@@ -12,11 +12,11 @@ from datetime import datetime
 
 # Preset haptic patterns
 PRESETS = {
-    "1": {"name": "Gentle", "intensity": 80, "duration": 100, "timeBetween": 0},
-    "2": {"name": "Medium", "intensity": 150, "duration": 200, "timeBetween": 50},
-    "3": {"name": "Strong", "intensity": 220, "duration": 300, "timeBetween": 100},
-    "4": {"name": "Pulse", "intensity": 200, "duration": 100, "timeBetween": 200},
-    "5": {"name": "Alert", "intensity": 255, "duration": 500, "timeBetween": 0},
+    "1": {"name": "Gentle", "intensity": 80, "duration": 100, "gap": 0},
+    "2": {"name": "Medium", "intensity": 150, "duration": 200, "gap": 50},
+    "3": {"name": "Strong", "intensity": 220, "duration": 300, "gap": 100},
+    "4": {"name": "Pulse", "intensity": 200, "duration": 100, "gap": 200},
+    "5": {"name": "Alert", "intensity": 255, "duration": 500, "gap": 0},
 }
 
 
@@ -46,7 +46,7 @@ class InteractiveServer:
         timestamp = datetime.now().strftime("%H:%M:%S")
         
         print(f"[{timestamp}] Broadcasting haptic event:")
-        print(f"  intensity={event['intensity']}, duration={event['duration']}ms, gap={event['timeBetween']}ms")
+        print(f"  intensity={event['intensity']}, duration={event['duration']}ms, gap={event['gap']}ms")
         print(f"  Sent to {len(self.clients)} client(s)")
         
         # Send to all connected clients
@@ -95,7 +95,7 @@ class InteractiveServer:
         print("="*60)
         print("\nPresets:")
         for key, preset in PRESETS.items():
-            print(f"  {key}. {preset['name']:10} - intensity:{preset['intensity']:3}, duration:{preset['duration']:3}ms, gap:{preset['timeBetween']:3}ms")
+            print(f"  {key}. {preset['name']:10} - intensity:{preset['intensity']:3}, duration:{preset['duration']:3}ms, gap:{preset['gap']:3}ms")
         print("\nCommands:")
         print("  s - Send START command (start session)")
         print("  x - Send STOP command (stop session)")
@@ -135,12 +135,12 @@ class InteractiveServer:
                     # Custom event
                     intensity = await loop.run_in_executor(None, input, "Intensity (0-255): ")
                     duration = await loop.run_in_executor(None, input, "Duration (ms): ")
-                    time_between = await loop.run_in_executor(None, input, "Time between (ms): ")
+                    gap = await loop.run_in_executor(None, input, "Gap (ms): ")
                     
                     event = {
                         "intensity": int(intensity),
                         "duration": int(duration),
-                        "timeBetween": int(time_between)
+                        "gap": int(gap)
                     }
                     await self.broadcast(event)
                 
@@ -148,9 +148,10 @@ class InteractiveServer:
                     # Preset event
                     preset = PRESETS[choice]
                     event = {
+                        "type": "haptic_event",
                         "intensity": preset["intensity"],
                         "duration": preset["duration"],
-                        "timeBetween": preset["timeBetween"]
+                        "gap": preset["gap"]
                     }
                     await self.broadcast(event)
                 

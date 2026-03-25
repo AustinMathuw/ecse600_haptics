@@ -6,7 +6,7 @@ WebSocket servers for testing the Watch Bridge Flutter app with two modes:
 
 ## Features
 
-- Event format: `{"intensity": 0-255, "duration": ms, "timeBetween": ms}`
+- Event format: `{"intensity": 0-255, "duration": ms, "gap": ms}`
 - Runs on `ws://0.0.0.0:8080` (accessible from any device on your network)
 - Interactive mode includes 5 presets for quick testing
 
@@ -74,7 +74,7 @@ Each event contains:
 {
   "intensity": 150,     // 0-255: vibration strength
   "duration": 250,      // milliseconds: how long to vibrate
-  "timeBetween": 100    // milliseconds: gap between vibrations
+  "gap": 100    // milliseconds: gap between vibrations
 }
 ```
 
@@ -83,7 +83,7 @@ Each event contains:
 The server generates random values within these ranges:
 - **intensity**: 50-255 (for noticeable feedback)
 - **duration**: 100-500ms
-- **timeBetween**: 0-200ms
+- **gap**: 0-200ms
 
 ## Logs
 

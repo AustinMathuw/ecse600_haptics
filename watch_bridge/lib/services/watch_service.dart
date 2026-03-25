@@ -84,9 +84,8 @@ class WatchService {
     try {
       final data = event.toJson();
       data['type'] = 'event';
-      print('Sending event to watch: $data');
+      print('Sending event to watch: ${event.mode}, intensity=${event.intensity}, duration=${event.duration}ms, gap=${event.gap}ms');
       await _watch.sendMessage(data);
-      print('Event sent successfully');
     } catch (e) {
       print('Error sending event to watch: $e');
     }

@@ -83,9 +83,10 @@ class WearableDataListenerService : WearableListenerService() {
     private fun handleEvent(messageMap: HashMap<*, *>) {
         val intensity = (messageMap["intensity"] as? Int) ?: 128
         val duration = (messageMap["duration"] as? Int) ?: 100
-        val timeBetween = (messageMap["timeBetween"] as? Int) ?: 0
+        val timeBetween = (messageMap["timeBetween"] as? Int) ?: (messageMap["gap"] as? Int) ?: 0
+        val mode = (messageMap["mode"] as? String) ?: "oneshot"
         
-        Log.d(TAG, "Received haptic event: intensity=$intensity, duration=$duration, timeBetween=$timeBetween")
+        Log.d(TAG, "Received haptic event: mode=$mode, intensity=$intensity, duration=$duration, gap=$timeBetween")
         
         // Send event to the foreground service to execute
         val intent = Intent(this, edu.cwru.watch_bridge.presentation.HapticService::class.java).apply {
@@ -93,6 +94,7 @@ class WearableDataListenerService : WearableListenerService() {
             putExtra("intensity", intensity)
             putExtra("duration", duration)
             putExtra("timeBetween", timeBetween)
+            putExtra("mode", mode)
         }
         startService(intent)
     }

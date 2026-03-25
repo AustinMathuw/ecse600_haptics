@@ -71,11 +71,12 @@ class WebSocketService {
           print('WebSocket command received: $command');
           _commandController.add(command);
         }
-      } else {
-        // Handle haptic event messages
+      } else if (type == 'haptic_event') {
+        // Handle haptic event messages only
         final event = HapticEvent.fromJson(data);
         _eventController.add(event);
       }
+      // Ignore other message types (like telemetry state updates)
     } catch (e) {
       print('Error parsing WebSocket message: $e');
     }

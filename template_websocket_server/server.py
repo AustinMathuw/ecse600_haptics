@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 WebSocket server that sends haptic event data every 5 seconds.
-Sends JSON messages with format: {"intensity": 0-255, "duration": ms, "timeBetween": ms}
+Sends JSON messages with format: {"intensity": 0-255, "duration": ms, "gap": ms}
 """
 
 import asyncio
@@ -25,7 +25,7 @@ async def send_haptic_events(websocket):
             event = {
                 "intensity": intensity,
                 "duration": duration,
-                "timeBetween": time_between
+                "gap": time_between
             }
             
             # Send the event

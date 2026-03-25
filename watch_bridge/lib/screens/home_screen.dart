@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       title: Text(
-                        'Duration: ${event.duration}ms, Gap: ${event.timeBetween}ms',
+                        'Duration: ${event.duration}ms, Gap: ${event.gap}ms',
                         style: const TextStyle(fontSize: 14),
                       ),
                       subtitle: Text(
