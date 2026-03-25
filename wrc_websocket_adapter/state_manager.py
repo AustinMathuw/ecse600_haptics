@@ -5,7 +5,10 @@ Maintains a shared state dictionary with the current telemetry values
 and manages session lifecycle (IDLE, ACTIVE, PAUSED).
 """
 
+import csv
+import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Dict, Any, Optional
 from id_resolver import get_resolver
 
@@ -63,6 +66,11 @@ class StateManager:
         self._pending_haptic_command = None
         self._pending_session_command = None
         
+        # CSV logging state
+        self._csv_file = None
+        self._csv_writer = None
+        self._csv_path = None
+
         # Haptic configuration (adjustable)
         self._min_gap = 50        # Gap at redline (ms) - fastest pulses
         self._max_gap = 1000       # Gap at idle (ms) - slowest pulses
@@ -181,6 +189,9 @@ class StateManager:
                 )
         
         self._update_count += 1
+
+        # Write telemetry row to CSV if a session is active
+        self._write_csv_row()
         
         # Update haptic state based on RPM (continuous mode)
         self._update_haptic_state()
@@ -361,6 +372,14 @@ class StateManager:
             self.session_status = status
             
             # Generate session commands for watch
+            # Open CSV on a fresh session start (from IDLE only, not resume)
+            if status == SessionStatus.ACTIVE and old_status == SessionStatus.IDLE:
+                self._open_csv_session()
+
+            # Close CSV when the session ends completely
+            if status == SessionStatus.IDLE:
+                self._close_csv_session()
+
             # Start when transitioning to ACTIVE
             if status == SessionStatus.ACTIVE and old_status != SessionStatus.ACTIVE:
                 self._pending_session_command = {
@@ -377,6 +396,63 @@ class StateManager:
                 }
                 print("Generated stop command for haptic session")
     
+    # ------------------------------------------------------------------
+    # CSV logging
+    # ------------------------------------------------------------------
+
+    _CSV_FIELDS = [
+        'timestamp',
+        'current_rpm', 'max_rpm', 'idle_rpm', 'redline_rpm',
+        'current_gear', 'max_gears',
+        'speed', 'handbrake',
+        'current_lap_time', 'track_position_percent', 'track_length',
+        'track_name', 'car_model',
+    ]
+
+    def _open_csv_session(self) -> None:
+        """Open a new CSV file for the current session."""
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Sanitise track / car names for use as filename fragments
+        filename = f"session_{timestamp}.csv"
+        sessions_dir = Path(__file__).parent / 'sessions'
+        sessions_dir.mkdir(exist_ok=True)
+        self._csv_path = sessions_dir / filename
+        self._csv_file = open(self._csv_path, 'w', newline='', encoding='utf-8')
+        self._csv_writer = csv.DictWriter(self._csv_file, fieldnames=self._CSV_FIELDS)
+        self._csv_writer.writeheader()
+        print(f"CSV logging started: {self._csv_path}")
+
+    def _close_csv_session(self) -> None:
+        """Flush and close the current CSV file."""
+        if self._csv_file is not None:
+            self._csv_file.flush()
+            self._csv_file.close()
+            self._csv_file = None
+            self._csv_writer = None
+            print(f"CSV session saved: {self._csv_path}")
+
+    def _write_csv_row(self) -> None:
+        """Append the current telemetry state as a row in the CSV."""
+        if self._csv_writer is None:
+            return
+        row = {
+            'timestamp': datetime.datetime.now().isoformat(timespec='milliseconds'),
+            'current_rpm': self.state['current_rpm'],
+            'max_rpm': self.state['max_rpm'],
+            'idle_rpm': self.state['idle_rpm'],
+            'redline_rpm': self.state['redline_rpm'],
+            'current_gear': self.state['current_gear'],
+            'max_gears': self.state['max_gears'],
+            'speed': self.state['speed'],
+            'handbrake': self.state['handbrake'],
+            'current_lap_time': self.state['current_lap_time'],
+            'track_position_percent': self.state['track_position_percent'],
+            'track_length': self.state['track_length'],
+            'track_name': self.state['track_name'],
+            'car_model': self.state['car_model'],
+        }
+        self._csv_writer.writerow(row)
+
     def get_state(self) -> Dict[str, Any]:
         """Get a copy of the current state.
         
