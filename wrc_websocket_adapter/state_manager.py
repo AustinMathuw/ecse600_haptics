@@ -66,8 +66,10 @@ class StateManager:
         # Haptic configuration (adjustable)
         self._min_gap = 50        # Gap at redline (ms) - fastest pulses
         self._max_gap = 1000       # Gap at idle (ms) - slowest pulses
-        self._vibration_duration = 100  # Fixed vibration duration (ms)
-        self._base_intensity = 0.5      # Base intensity (0.0-1.0)
+        self._min_vibration_duration = 100   # Minimum vibration duration (ms)
+        self._max_vibration_duration = 200  # Maximum vibration duration (ms)
+        self._min_intensity = 0.3     # Minimum intensity at idle (0.0-1.0)
+        self._max_intensity = 1.0     # Maximum intensity at redline (0.0-1.0)
     
     def update_from_session_start(self, packet_data: Dict[str, Any]) -> None:
         """Update state from session_start packet.
@@ -229,14 +231,21 @@ class StateManager:
         # Linear interpolation for gap: 
         # gap = max_gap - (max_gap - min_gap) * position
         # As position increases (0→1), gap decreases (max_gap→min_gap)
-        gap = int(self._max_gap - (self._max_gap - self._min_gap) * position)
+        # gap = int(self._max_gap - (self._max_gap - self._min_gap) * position)
+
+        # For a more exponential feel, we can use a power curve:
+        gap = int(self._max_gap - (self._max_gap - self._min_gap) * (position ** 1.5))
         
-        # Optional: Increase intensity as RPM increases
-        intensity = 0.5
+        # Optional: Increase intensity as RPM increases, exponentially for more impact
+        intensity = self._min_intensity + (self._max_intensity - self._min_intensity) * (position ** 2)
+
+        # Optional: Adjust vibration duration based on RPM position
+        duration = int(self._min_vibration_duration + (self._max_vibration_duration - self._min_vibration_duration) * (position ** 2))
+
         
         return {
             'intensity': intensity,
-            'duration': self._vibration_duration,
+            'duration': duration,
             'gap': gap,
             'mode': 'loop'
         }
