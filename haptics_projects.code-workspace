@@ -10,7 +10,7 @@
 			"path": "template_websocket_server"
 		},
 		{
-			"path": "wrc_websocket_adapter"
+			"path": "game_websocket_adapter"
 		}
 	],
 	"settings": {}
