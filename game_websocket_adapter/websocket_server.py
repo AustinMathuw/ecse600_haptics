@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from shared.websocket_server import HapticWebSocketServer
+from src.shared.websocket_server import HapticWebSocketServer
 
 __all__ = ["HapticWebSocketServer"]

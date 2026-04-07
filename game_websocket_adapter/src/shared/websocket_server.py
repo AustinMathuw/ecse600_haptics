@@ -6,14 +6,17 @@ import asyncio
 import importlib
 import json
 from typing import Any, Set
+from urllib.parse import parse_qs, urlparse
 
-from shared.contracts import GameStateManager
+from src.shared.contracts import GameStateManager
 
 
 class HapticWebSocketServer:
     """WebSocket server for haptic device connections."""
 
-    def __init__(self, state_manager: GameStateManager, host: str = "0.0.0.0", port: int = 8080):
+    def __init__(
+        self, state_manager: GameStateManager, host: str = "0.0.0.0", port: int = 8080
+    ):
         self.host = host
         self.port = port
         self.state_manager = state_manager
@@ -36,16 +39,24 @@ class HapticWebSocketServer:
     async def unregister(self, websocket: Any) -> None:
         self.clients.discard(websocket)
         remote = websocket.remote_address
-        print(f"Client disconnected: {remote[0]}:{remote[1]} (total: {len(self.clients)})")
+        print(
+            f"Client disconnected: {remote[0]}:{remote[1]} (total: {len(self.clients)})"
+        )
 
     async def handle_client(self, websocket: Any) -> None:
+        path = websocket.request.path if websocket.request is not None else "/"
+        params = parse_qs(urlparse(path).query)
+        driver_name = params.get("driver", ["Default Driver"])[0]
+        self.state_manager.set_driver_name(driver_name)
         await self.register(websocket)
         try:
             async for message in websocket:
                 try:
                     data = json.loads(message)
                     if data.get("type") == "get_state":
-                        await websocket.send(json.dumps(self.state_manager.get_full_state()))
+                        await websocket.send(
+                            json.dumps(self.state_manager.get_full_state())
+                        )
                 except json.JSONDecodeError:
                     print(f"Invalid JSON from client: {message}")
         except self.websockets.exceptions.ConnectionClosed:

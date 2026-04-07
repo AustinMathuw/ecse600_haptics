@@ -7,7 +7,7 @@ import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from shared.contracts import GameStateManager, SessionStatus
+from src.shared.contracts import GameStateManager, SessionStatus
 
 
 class BaseStateManager(GameStateManager):
@@ -15,6 +15,7 @@ class BaseStateManager(GameStateManager):
 
     _CSV_FIELDS = [
         "timestamp",
+        "driver_name",
         "current_rpm",
         "max_rpm",
         "idle_rpm",
@@ -23,6 +24,8 @@ class BaseStateManager(GameStateManager):
         "max_gears",
         "speed",
         "handbrake",
+        "brake",
+        "throttle",
         "current_lap_time",
         "track_position_percent",
         "track_length",
@@ -41,6 +44,8 @@ class BaseStateManager(GameStateManager):
             "current_gear": 0,
             "speed": 0.0,
             "handbrake": 0.0,
+            "brake": 0.0,
+            "throttle": 0.0,
             "current_lap_time": 0.0,
             "track_position_percent": 0.0,
             "track_length": 0.0,
@@ -56,6 +61,7 @@ class BaseStateManager(GameStateManager):
         self._csv_file = None
         self._csv_writer = None
         self._csv_path: Optional[Path] = None
+        self._driver_name: str = "Default Driver"
 
         self._min_gap = 50
         self._max_gap = 1000
@@ -102,11 +108,14 @@ class BaseStateManager(GameStateManager):
                 "mode": "oneshot",
             }
 
-        gap = int(self._max_gap - (self._max_gap - self._min_gap) * (position ** 1.5))
-        intensity = self._min_intensity + (self._max_intensity - self._min_intensity) * (position ** 2)
+        gap = int(self._max_gap - (self._max_gap - self._min_gap) * (position**1.5))
+        intensity = self._min_intensity + (
+            self._max_intensity - self._min_intensity
+        ) * (position**2)
         duration = int(
             self._min_vibration_duration
-            + (self._max_vibration_duration - self._min_vibration_duration) * (position ** 2)
+            + (self._max_vibration_duration - self._min_vibration_duration)
+            * (position**2)
         )
 
         return {
@@ -129,8 +138,13 @@ class BaseStateManager(GameStateManager):
         if self._last_sent_params is None:
             return True
 
-        gap_changed = abs(new_params["gap"] - self._last_sent_params.get("gap", 0)) >= 30
-        intensity_changed = abs(new_params["intensity"] - self._last_sent_params.get("intensity", 0.0)) >= 0.05
+        gap_changed = (
+            abs(new_params["gap"] - self._last_sent_params.get("gap", 0)) >= 30
+        )
+        intensity_changed = (
+            abs(new_params["intensity"] - self._last_sent_params.get("intensity", 0.0))
+            >= 0.05
+        )
         mode_changed = new_params["mode"] != self._last_sent_params.get("mode")
         return gap_changed or intensity_changed or mode_changed
 
@@ -153,6 +167,10 @@ class BaseStateManager(GameStateManager):
         cmd = self._pending_session_command
         self._pending_session_command = None
         return cmd
+
+    def set_driver_name(self, name: str) -> None:
+        self._driver_name = name
+        print(f"Driver name set: {name}")
 
     def set_session_status(self, status: SessionStatus) -> None:
         if self.session_status == status:
@@ -177,8 +195,9 @@ class BaseStateManager(GameStateManager):
 
     def _open_csv_session(self) -> None:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"session_{timestamp}.csv"
-        sessions_dir = Path(__file__).resolve().parent.parent / "sessions"
+        driver_slug = self._driver_name.strip().lower().replace(" ", "_")
+        filename = f"session_{timestamp}_{driver_slug}.csv"
+        sessions_dir = Path(__file__).resolve().parent.parent.parent / "sessions"
         sessions_dir.mkdir(exist_ok=True)
         self._csv_path = sessions_dir / filename
         self._csv_file = open(self._csv_path, "w", newline="", encoding="utf-8")
@@ -202,6 +221,7 @@ class BaseStateManager(GameStateManager):
 
         row = {
             "timestamp": datetime.datetime.now().isoformat(timespec="milliseconds"),
+            "driver_name": self._driver_name,
             "current_rpm": self.state["current_rpm"],
             "max_rpm": self.state["max_rpm"],
             "idle_rpm": self.state["idle_rpm"],
@@ -210,6 +230,8 @@ class BaseStateManager(GameStateManager):
             "max_gears": self.state["max_gears"],
             "speed": self.state["speed"],
             "handbrake": self.state["handbrake"],
+            "brake": self.state["brake"],
+            "throttle": self.state["throttle"],
             "current_lap_time": self.state["current_lap_time"],
             "track_position_percent": self.state["track_position_percent"],
             "track_length": self.state["track_length"],

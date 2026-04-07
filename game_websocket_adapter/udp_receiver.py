@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from wrc.udp_receiver import WRCUDPReceiver
+from src.wrc.udp_receiver import WRCUDPReceiver
 
 
 async def start_udp_servers(receiver: WRCUDPReceiver):

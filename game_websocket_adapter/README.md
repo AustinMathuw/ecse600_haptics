@@ -38,11 +38,30 @@ To enable telemetry output from EA SPORTS™ WRC:
    - `session_end` (port 29889, frequencyHz: 0)
    - `session_pause` (port 29889, frequencyHz: 0)
    - `session_resume` (port 29889, frequencyHz: 0)
-   
-   Or copy the provided [wrc_deps/config.json](wrc_deps/config.json) to your WRC telemetry folder
+
+   Or copy the provided [src/wrc/deps/config.json](src/wrc/deps/config.json) to your WRC telemetry folder
+
 4. **Verify settings**: IP should be `"127.0.0.1"` for localhost
 5. **Re-launch EA SPORTS WRC** to reload the configuration
 6. **Check log.txt** in the telemetry folder for errors/confirmations
+
+## DiRT Rally 2.0 configuration
+
+1. Go to `C:\Users\<USER>\Documents\My Games\DiRT Rally 2.0\hardwaresettings`;
+2. Open `hardware_settings_config` file with your favorite text editor;
+3. Find for **udp** tag and configure as shown below:
+
+   ```xml
+   <motion_platform>
+        ...
+        <udp enabled="true" extradata="3" ip="127.0.0.1" port="10001" delay="1" />
+        ...
+   </motion_platform>
+   ```
+
+   - **enabled = true**
+   - **extradata = 3**
+   - **port = 10001**
 
 ## Usage
 
@@ -53,6 +72,7 @@ uv run python main.py
 ```
 
 The adapter will start both:
+
 - UDP servers on ports 29888 (session_update) and 29889 (session events)
 - WebSocket server on ws://0.0.0.0:8080
 
@@ -66,9 +86,9 @@ You can test the WebSocket connection using a browser console or wscat:
 
 ```javascript
 // Browser console
-const ws = new WebSocket('ws://localhost:8080');
+const ws = new WebSocket("ws://localhost:8080");
 ws.onmessage = (event) => console.log(JSON.parse(event.data));
-ws.send(JSON.stringify({type: 'get_state'}));
+ws.send(JSON.stringify({ type: "get_state" }));
 ```
 
 ## Architecture
@@ -76,7 +96,7 @@ ws.send(JSON.stringify({type: 'get_state'}));
 - **id_resolver.py**: Parses ids.json to resolve vehicle/location/rout using custom wrc_haptic_watch structure
 - **websocket_server.py**: Manages WebSocket connections to haptic devices
 - **main.py**: Orchestrates all components using asyncio
-- **wrc_deps/udp/wrc_haptic_watch.json**: Custom packet structure defining only needed telemetry channels
+- **src/wrc/deps/udp/wrc_haptic_watch.json**: Custom packet structure defining only needed telemetry channels
 
 ## Telemetry Data
 
@@ -120,7 +140,8 @@ The adapter maintains the following telemetry fields:
 
 - **No telemetry received**: Check WRC's `telemetry/log.txt` for errors
 - **Port conflicts**: Ensure ports 29888, 29889, and 8080 are not in use
-- **Unknown vehicle/track names**: Verify `wrc_deps/readme/ids.json` exists and is up to date
+- **Unknown vehicle/track names**: Verify `src/wrc/deps/readme/ids.json` exists and is up to date
+
 ```
 
 ### Connect from Flutter app:
@@ -130,10 +151,12 @@ The adapter maintains the following telemetry fields:
    - Mac/Linux: `ifconfig` or `ip addr`
 
 2. In the Flutter app, enter the WebSocket URL:
-   ```
-   ws://YOUR_COMPUTER_IP:8080
-   ```
-   Example: `ws://192.168.1.100:8080`
+```
+
+ws://YOUR_COMPUTER_IP:8080
+
+````
+Example: `ws://192.168.1.100:8080`
 
 3. Click "Connect" in the Flutter app
 
@@ -145,15 +168,16 @@ Each event contains:
 
 ```json
 {
-  "intensity": 150,     // 0-255: vibration strength
-  "duration": 250,      // milliseconds: how long to vibrate
-  "gap": 100    // milliseconds: gap between vibrations
+"intensity": 150,     // 0-255: vibration strength
+"duration": 250,      // milliseconds: how long to vibrate
+"gap": 100    // milliseconds: gap between vibrations
 }
-```
+````
 
 ## Testing
 
 The server generates random values within these ranges:
+
 - **intensity**: 50-255 (for noticeable feedback)
 - **duration**: 100-500ms
 - **gap**: 0-200ms

@@ -16,13 +16,16 @@ class AppState extends ChangeNotifier {
   SessionState _sessionState = SessionState.idle;
   WebSocketConnectionStatus _wsStatus = WebSocketConnectionStatus.disconnected;
   WatchConnectionStatus _watchStatus = WatchConnectionStatus.unpaired;
-  String _websocketUrl = 'ws://10.0.1.77:8080';
+  //String _websocketUrl = 'ws://10.0.1.77:8080';
+  String _websocketUrl = 'ws://192.168.0.8:8080';
+  String _driverName = 'Default Driver';
 
   SessionState get sessionState => _sessionState;
   WebSocketConnectionStatus get wsStatus => _wsStatus;
   WatchConnectionStatus get watchStatus => _watchStatus;
   List<HapticEvent> get events => _eventStorage.events;
   String get websocketUrl => _websocketUrl;
+  String get driverName => _driverName;
 
   AppState() {
     _initialize();
@@ -108,8 +111,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setDriverName(String name) {
+    _driverName = name;
+    notifyListeners();
+  }
+
   void connectWebSocket() {
-    _webSocketService.connect(_websocketUrl);
+    final base = Uri.parse(_websocketUrl);
+    final uri = base.replace(
+      queryParameters: {...base.queryParameters, 'driver': _driverName},
+    );
+    _webSocketService.connect(uri.toString());
   }
 
   void disconnectWebSocket() {

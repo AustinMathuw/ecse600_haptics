@@ -47,6 +47,10 @@ class GameStateManager(ABC):
     def get_full_state(self) -> Dict[str, Any]:
         pass
 
+    @abstractmethod
+    def set_driver_name(self, name: str) -> None:
+        pass
+
 
 class IdentityResolver(ABC):
     """Interface for resolving game-specific vehicle/track identifiers."""

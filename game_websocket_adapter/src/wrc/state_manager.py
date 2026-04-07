@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from shared.base_state_manager import BaseStateManager
-from shared.contracts import IdentityResolver
+from src.shared.base_state_manager import BaseStateManager
+from src.shared.contracts import IdentityResolver
 
 
 class WRCStateManager(BaseStateManager):
@@ -36,7 +36,9 @@ class WRCStateManager(BaseStateManager):
 
         if "vehicle_id" in packet_data:
             self.state["_vehicle_id"] = packet_data["vehicle_id"]
-            self.state["car_model"] = self.id_resolver.get_vehicle_name(packet_data["vehicle_id"])
+            self.state["car_model"] = self.id_resolver.get_vehicle_name(
+                packet_data["vehicle_id"]
+            )
 
         if "location_id" in packet_data and "route_id" in packet_data:
             self.state["_location_id"] = packet_data["location_id"]
@@ -45,7 +47,9 @@ class WRCStateManager(BaseStateManager):
                 packet_data["location_id"], packet_data["route_id"]
             )
 
-        print(f"WRC session started: {self.state['car_model']} on {self.state['track_name']}")
+        print(
+            f"WRC session started: {self.state['car_model']} on {self.state['track_name']}"
+        )
 
     def _apply_session_update(self, packet_data: Dict[str, Any]) -> None:
         if "vehicle_engine_rpm_current" in packet_data:
@@ -85,7 +89,12 @@ class WRCStateManager(BaseStateManager):
         if "location_id" in packet_data and "route_id" in packet_data:
             location_id = packet_data["location_id"]
             route_id = packet_data["route_id"]
-            if self.state["_location_id"] != location_id or self.state["_route_id"] != route_id:
+            if (
+                self.state["_location_id"] != location_id
+                or self.state["_route_id"] != route_id
+            ):
                 self.state["_location_id"] = location_id
                 self.state["_route_id"] = route_id
-                self.state["track_name"] = self.id_resolver.get_track_name(location_id, route_id)
+                self.state["track_name"] = self.id_resolver.get_track_name(
+                    location_id, route_id
+                )

@@ -13,17 +13,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late TextEditingController _urlController;
+  late TextEditingController _driverNameController;
 
   @override
   void initState() {
     super.initState();
     final appState = Provider.of<AppState>(context, listen: false);
     _urlController = TextEditingController(text: appState.websocketUrl);
+    _driverNameController = TextEditingController(text: appState.driverName);
   }
 
   @override
   void dispose() {
     _urlController.dispose();
+    _driverNameController.dispose();
     super.dispose();
   }
 
@@ -68,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Icon(Icons.cloud),
                 const SizedBox(width: 8),
                 const Text(
-                  'WebSocket Connection',
+                  'Connection Settings',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -76,6 +79,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Driver Name',
+                hintText: 'Default Driver',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person),
+              ),
+              controller: _driverNameController,
+              onChanged: (value) => appState.setDriverName(value),
+              enabled: appState.wsStatus != WebSocketConnectionStatus.connected,
+            ),
+            const SizedBox(height: 12),
             TextField(
               decoration: const InputDecoration(
                 labelText: 'WebSocket URL',

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from shared.contracts import IdentityResolver
+from src.shared.contracts import IdentityResolver
 
 
 class DirtIDResolver(IdentityResolver):

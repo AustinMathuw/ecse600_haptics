@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from wrc.id_resolver import WRCIDResolver
-from wrc.state_manager import WRCStateManager
+from src.wrc.id_resolver import WRCIDResolver
+from src.wrc.state_manager import WRCStateManager
 
 
 StateManager = WRCStateManager

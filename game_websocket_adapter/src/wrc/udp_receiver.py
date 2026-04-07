@@ -8,14 +8,16 @@ from pathlib import Path
 import struct
 from typing import Any, Dict, List, Optional, Tuple
 
-from shared.contracts import SessionStatus, TelemetryReceiver
-from wrc.state_manager import WRCStateManager
+from src.shared.contracts import SessionStatus, TelemetryReceiver
+from src.wrc.state_manager import WRCStateManager
 
 
 class PacketStructure:
     """Represents a parsed WRC packet structure with channel info."""
 
-    def __init__(self, packet_id: str, channels: List[str], channel_types: Dict[str, str]):
+    def __init__(
+        self, packet_id: str, channels: List[str], channel_types: Dict[str, str]
+    ):
         self.packet_id = packet_id
         self.channels = channels
         self.channel_types = channel_types
@@ -45,7 +47,9 @@ class PacketStructure:
 
     def parse(self, data: bytes) -> Dict[str, Any]:
         if len(data) < self.struct_size:
-            raise ValueError(f"Packet too small: expected {self.struct_size}, got {len(data)}")
+            raise ValueError(
+                f"Packet too small: expected {self.struct_size}, got {len(data)}"
+            )
 
         values = struct.unpack(self.format_string, data[: self.struct_size])
         result: Dict[str, Any] = {}
@@ -69,7 +73,7 @@ class WRCUDPReceiver(TelemetryReceiver):
     def _load_packet_definitions(self) -> None:
         base_path = Path(__file__).resolve().parent.parent
 
-        channels_path = base_path / "wrc_deps" / "readme" / "channels.json"
+        channels_path = base_path / "src" / "wrc" / "deps" / "readme" / "channels.json"
         channel_types: Dict[str, str] = {}
         try:
             with open(channels_path, "r", encoding="utf-8-sig") as f:
@@ -80,7 +84,9 @@ class WRCUDPReceiver(TelemetryReceiver):
         except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
             print(f"Error loading channels.json: {exc}")
 
-        haptic_watch_path = base_path / "wrc_deps" / "udp" / "wrc_haptic_watch.json"
+        haptic_watch_path = (
+            base_path / "src" / "wrc" / "deps" / "udp" / "wrc_haptic_watch.json"
+        )
         try:
             with open(haptic_watch_path, "r", encoding="utf-8-sig") as f:
                 haptic_watch_data = json.load(f)
@@ -98,7 +104,7 @@ class WRCUDPReceiver(TelemetryReceiver):
         except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
             print(f"Error loading wrc_haptic_watch.json: {exc}")
 
-        packets_path = base_path / "wrc_deps" / "readme" / "packets.json"
+        packets_path = base_path / "src" / "wrc" / "deps" / "readme" / "packets.json"
         try:
             with open(packets_path, "r", encoding="utf-8-sig") as f:
                 packets_data = json.load(f)

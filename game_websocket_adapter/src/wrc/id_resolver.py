@@ -6,13 +6,13 @@ import json
 from pathlib import Path
 from typing import Dict
 
-from shared.contracts import IdentityResolver
+from src.shared.contracts import IdentityResolver
 
 
 class WRCIDResolver(IdentityResolver):
     """Resolves WRC numeric IDs to human-readable names."""
 
-    def __init__(self, ids_json_path: str = "wrc_deps/readme/ids.json"):
+    def __init__(self, ids_json_path: str = "src/wrc/deps/readme/ids.json"):
         self.vehicles: Dict[int, str] = {}
         self.locations: Dict[int, str] = {}
         self.routes: Dict[int, str] = {}
@@ -38,8 +38,17 @@ class WRCIDResolver(IdentityResolver):
             )
         except FileNotFoundError:
             print(f"Warning: {json_path} not found. ID resolution will return raw IDs.")
-        except (OSError, UnicodeError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
-            print(f"Error loading {json_path}: {exc}. ID resolution will return raw IDs.")
+        except (
+            OSError,
+            UnicodeError,
+            ValueError,
+            TypeError,
+            KeyError,
+            json.JSONDecodeError,
+        ) as exc:
+            print(
+                f"Error loading {json_path}: {exc}. ID resolution will return raw IDs."
+            )
 
     def get_vehicle_name(self, vehicle_id: int) -> str:
         return self.vehicles.get(vehicle_id, f"Unknown Vehicle (ID: {vehicle_id})")
@@ -51,4 +60,6 @@ class WRCIDResolver(IdentityResolver):
         return self.routes.get(route_id, f"Unknown Route (ID: {route_id})")
 
     def get_track_name(self, location_id: int, route_id: int) -> str:
-        return f"{self.get_location_name(location_id)} - {self.get_route_name(route_id)}"
+        return (
+            f"{self.get_location_name(location_id)} - {self.get_route_name(route_id)}"
+        )

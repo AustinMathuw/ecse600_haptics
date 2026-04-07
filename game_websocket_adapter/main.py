@@ -2,13 +2,16 @@
 
 import asyncio
 import os
+from dotenv import load_dotenv
 
-from shared.websocket_server import HapticWebSocketServer
-from wrc.id_resolver import WRCIDResolver
-from wrc.state_manager import WRCStateManager
-from wrc.udp_receiver import WRCUDPReceiver
-from dirt.state_manager import DirtStateManager
-from dirt.udp_receiver import DirtUDPReceiver
+load_dotenv()
+
+from src.shared.websocket_server import HapticWebSocketServer
+from src.wrc.id_resolver import WRCIDResolver
+from src.wrc.state_manager import WRCStateManager
+from src.wrc.udp_receiver import WRCUDPReceiver
+from src.dirt.state_manager import DirtStateManager
+from src.dirt.udp_receiver import DirtUDPReceiver
 
 
 def _create_game_services():

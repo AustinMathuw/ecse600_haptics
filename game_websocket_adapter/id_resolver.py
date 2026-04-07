@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from wrc.id_resolver import WRCIDResolver
+from src.wrc.id_resolver import WRCIDResolver
 
 
 IDResolver = WRCIDResolver
