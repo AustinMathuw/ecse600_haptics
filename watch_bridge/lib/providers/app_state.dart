@@ -16,8 +16,9 @@ class AppState extends ChangeNotifier {
   SessionState _sessionState = SessionState.idle;
   WebSocketConnectionStatus _wsStatus = WebSocketConnectionStatus.disconnected;
   WatchConnectionStatus _watchStatus = WatchConnectionStatus.unpaired;
-  //String _websocketUrl = 'ws://10.0.1.77:8080';
-  String _websocketUrl = 'ws://192.168.0.8:8080';
+  String _websocketUrl = 'ws://10.70.214.68:8080'; // Lost Hotspot
+  //String _websocketUrl = 'ws://10.0.1.77:8080'; // Home
+  //String _websocketUrl = 'ws://192.168.0.8:8080'; // Lab
   String _driverName = 'Default Driver';
 
   SessionState get sessionState => _sessionState;

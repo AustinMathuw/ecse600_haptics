@@ -20,6 +20,8 @@ class BaseStateManager(GameStateManager):
         "max_rpm",
         "idle_rpm",
         "redline_rpm",
+        "downshift_rpm",
+        "upshift_rpm",
         "current_gear",
         "max_gears",
         "speed",
@@ -39,6 +41,8 @@ class BaseStateManager(GameStateManager):
             "max_rpm": 0.0,
             "redline_rpm": 0.0,
             "idle_rpm": 0.0,
+            "downshift_rpm": 0.0,
+            "upshift_rpm": 0.0,
             "current_rpm": 0.0,
             "max_gears": 0,
             "current_gear": 0,
@@ -99,8 +103,9 @@ class BaseStateManager(GameStateManager):
         return max(0.0, min(1.0, position))
 
     def calculate_haptic_parameters(self) -> dict:
-        position = self.calculate_rpm_position()
-        if position <= 0.0:
+        downshift_rpm = float(self.state.get("downshift_rpm", 0.0))
+        upshift_rpm = float(self.state.get("upshift_rpm", 0.0))
+        if downshift_rpm <= 0.0 or upshift_rpm <= 0.0:
             return {
                 "intensity": 0.0,
                 "duration": 0,
@@ -108,22 +113,70 @@ class BaseStateManager(GameStateManager):
                 "mode": "oneshot",
             }
 
-        gap = int(self._max_gap - (self._max_gap - self._min_gap) * (position**1.5))
-        intensity = self._min_intensity + (
-            self._max_intensity - self._min_intensity
-        ) * (position**2)
-        duration = int(
-            self._min_vibration_duration
-            + (self._max_vibration_duration - self._min_vibration_duration)
-            * (position**2)
-        )
+        current_rpm = float(self.state.get("current_rpm", 0.0))
+        idle_rpm = float(self.state.get("idle_rpm", 0.0))
+        redline_rpm = float(self.state.get("redline_rpm", 0.0))
 
-        return {
-            "intensity": intensity,
-            "duration": duration,
-            "gap": gap,
-            "mode": "loop",
-        }
+        if current_rpm < downshift_rpm:
+            if downshift_rpm <= idle_rpm:
+                return {
+                    "intensity": 0.0,
+                    "duration": 0,
+                    "gap": 0,
+                    "mode": "oneshot",
+                }
+
+            # Below downshift threshold, increase intensity as we approach downshift rpm
+            position = (current_rpm - idle_rpm) / (downshift_rpm - idle_rpm)
+            position = max(0.0, min(1.0, position))
+            intensity = self._max_intensity + (
+                self._min_intensity - self._max_intensity
+            ) * (position**2)
+            duration = self._min_vibration_duration + int(
+                (self._max_vibration_duration - self._min_vibration_duration)
+                * (position**2)
+            )
+            gap = int(self._min_gap + (self._max_gap - self._min_gap) * position)
+            return {
+                "intensity": intensity,
+                "duration": duration,
+                "gap": gap,
+                "mode": "loop",
+            }
+        elif current_rpm < upshift_rpm:
+            # Between downshift and upshift, constant vibration
+            return {
+                "intensity": self._min_intensity,
+                "duration": self._max_vibration_duration,
+                "gap": self._max_gap,
+                "mode": "loop",
+            }
+        else:
+            if redline_rpm <= upshift_rpm:
+                return {
+                    "intensity": self._min_intensity,
+                    "duration": self._max_vibration_duration,
+                    "gap": self._max_gap,
+                    "mode": "loop",
+                }
+
+            # Above upshift threshold, increase output as we approach redline rpm.
+            position = (current_rpm - upshift_rpm) / (redline_rpm - upshift_rpm)
+            position = max(0.0, min(1.0, position))
+            intensity = self._min_intensity + (
+                self._max_intensity - self._min_intensity
+            ) * (position**2)
+            duration = self._max_vibration_duration + int(
+                (self._min_vibration_duration - self._max_vibration_duration)
+                * (position**2)
+            )
+            gap = int(self._max_gap - (self._max_gap - self._min_gap) * position)
+            return {
+                "intensity": intensity,
+                "duration": duration,
+                "gap": gap,
+                "mode": "loop",
+            }
 
     def _update_haptic_state(self) -> None:
         if self.session_status != SessionStatus.ACTIVE:
@@ -226,6 +279,8 @@ class BaseStateManager(GameStateManager):
             "max_rpm": self.state["max_rpm"],
             "idle_rpm": self.state["idle_rpm"],
             "redline_rpm": self.state["redline_rpm"],
+            "downshift_rpm": self.state["downshift_rpm"],
+            "upshift_rpm": self.state["upshift_rpm"],
             "current_gear": self.state["current_gear"],
             "max_gears": self.state["max_gears"],
             "speed": self.state["speed"],

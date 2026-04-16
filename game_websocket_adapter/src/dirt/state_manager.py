@@ -21,16 +21,22 @@ class DirtStateManager(BaseStateManager):
         raw_idle_rpm = float(packet_data.get("idle_rpm", 0.0))
         raw_red_rpm = float(packet_data.get("red_rpm", 0.0))
         raw_max_rpm = float(packet_data.get("max_rpm", 0.0))
+        raw_downshift_rpm = float(packet_data.get("downshift_rpm", 0.0))
+        raw_upshift_rpm = float(packet_data.get("upshift_rpm", 0.0))
 
         current_rpm = max(0.0, raw_engine_speed * self.RPM_SCALE)
         idle_rpm = max(0.0, raw_idle_rpm * self.RPM_SCALE)
         red_rpm = max(0.0, raw_red_rpm * self.RPM_SCALE)
         max_rpm = max(0.0, raw_max_rpm * self.RPM_SCALE)
+        downshift_rpm = max(0.0, raw_downshift_rpm * self.RPM_SCALE)
+        upshift_rpm = max(0.0, raw_upshift_rpm * self.RPM_SCALE)
 
         self.state["current_rpm"] = current_rpm
         self.state["max_rpm"] = max_rpm
         self.state["idle_rpm"] = idle_rpm
         self.state["redline_rpm"] = red_rpm
+        self.state["downshift_rpm"] = downshift_rpm
+        self.state["upshift_rpm"] = upshift_rpm
 
         self.state["current_gear"] = int(round(float(packet_data.get("gear", 0.0))))
         self.state["max_gears"] = int(
@@ -55,3 +61,20 @@ class DirtStateManager(BaseStateManager):
         self.state["handbrake"] = 0.0
         self.state["car_model"] = "DiRT Rally 2.0"
         self.state["track_name"] = "Unknown Dirt Track"
+
+
+# expotiental: weber function
+# Litterally get the mapping
+
+# discreatize:
+
+# 1-2-3- approching
+
+# How fast to approch
+
+# shorten the band
+
+# Could be a P (position) ID ()
+
+
+# Timing weber fraction

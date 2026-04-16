@@ -16,9 +16,13 @@ from src.dirt.state_manager import DirtStateManager
 
 DUMP_PACKETS = os.getenv("DUMP_PACKETS", "false").strip().lower() == "true"
 
-CAR_MAX_RPM = 800
+# RPM values that map to dirt
 CAR_IDLE_RPM = 95
-CAR_REDLINE_RPM = 720
+CAR_IDLE_RPM = 200
+CAR_DOWNSHIFT_RPM = 400
+CAR_UPSHIFT_RPM = 550
+CAR_REDLINE_RPM = 600
+CAR_MAX_RPM = 800
 
 # Known field names keyed by byte offset, sourced from confirmed Dirt Rally 2.0
 # UDP telemetry layout (66 fields). Brakes_temp is expanded to per-corner suffixes:
@@ -212,6 +216,8 @@ class DirtUDPReceiver(TelemetryReceiver):
             "max_rpm": CAR_MAX_RPM,  # self._read_float(data, 228),
             "idle_rpm": CAR_IDLE_RPM,  # self._read_float(data, 232),
             "red_rpm": CAR_REDLINE_RPM,
+            "downshift_rpm": CAR_DOWNSHIFT_RPM,
+            "upshift_rpm": CAR_UPSHIFT_RPM,
             "current_lap_rx": self._read_float(data, 236),
             "total_laps_rx": self._read_float(data, 240),
             "track_id": self._read_float(data, 244),
