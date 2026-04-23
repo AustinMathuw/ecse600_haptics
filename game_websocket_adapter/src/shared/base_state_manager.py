@@ -117,8 +117,10 @@ class BaseStateManager(GameStateManager):
         idle_rpm = float(self.state.get("idle_rpm", 0.0))
         redline_rpm = float(self.state.get("redline_rpm", 0.0))
 
+        current_gear = int(self.state.get("current_gear", 0))
+
         if current_rpm < downshift_rpm:
-            if downshift_rpm <= idle_rpm:
+            if downshift_rpm <= idle_rpm or current_gear <= 1:
                 return {
                     "intensity": 0.0,
                     "duration": 0,

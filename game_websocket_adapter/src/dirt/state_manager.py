@@ -61,20 +61,3 @@ class DirtStateManager(BaseStateManager):
         self.state["handbrake"] = 0.0
         self.state["car_model"] = "DiRT Rally 2.0"
         self.state["track_name"] = "Unknown Dirt Track"
-
-
-# expotiental: weber function
-# Litterally get the mapping
-
-# discreatize:
-
-# 1-2-3- approching
-
-# How fast to approch
-
-# shorten the band
-
-# Could be a P (position) ID ()
-
-
-# Timing weber fraction
