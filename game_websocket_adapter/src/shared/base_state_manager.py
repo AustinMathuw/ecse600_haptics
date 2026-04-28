@@ -165,9 +165,10 @@ class BaseStateManager(GameStateManager):
             # Above upshift threshold, increase output as we approach redline rpm.
             position = (current_rpm - upshift_rpm) / (redline_rpm - upshift_rpm)
             position = max(0.0, min(1.0, position))
+            taper = 1.0 - ((1.0 - position) ** 2)
             intensity = self._min_intensity + (
                 self._max_intensity - self._min_intensity
-            ) * (position**2)
+            ) * taper
             duration = self._max_vibration_duration + int(
                 (self._min_vibration_duration - self._max_vibration_duration)
                 * (position**2)
